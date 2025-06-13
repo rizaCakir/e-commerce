@@ -1,4 +1,6 @@
-﻿namespace ebeytepe.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace ebeytepe.Models;
 
 public class Autobid
 {
@@ -8,5 +10,7 @@ public class Autobid
     public decimal Increment { get; set; }
 
     public User User { get; set; }
+    
+    [JsonIgnore]
     public Item Item { get; set; }
 }

@@ -62,15 +62,30 @@ namespace ebeytepe.Controllers
         }
 
 
-        // PUT: api/Item/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Item item)
+        public async Task<IActionResult> Update(int id, [FromBody] ItemUpdateDto dto)
         {
-            if (id != item.ItemId) return BadRequest();
-            _context.Entry(item).State = EntityState.Modified;
+            if (id != dto.ItemId) return BadRequest();
+
+            var item = await _context.Items.FindAsync(id);
+            if (item == null) return NotFound();
+
+            item.Title = dto.Title;
+            item.Description = dto.Description;
+            item.Category = dto.Category;
+            item.CurrentPrice = dto.CurrentPrice;
+            item.StartingPrice = dto.StartingPrice;
+            item.BuyoutPrice = dto.BuyoutPrice;
+            item.StartTime = dto.StartTime;
+            item.EndTime = dto.EndTime;
+            item.Image = dto.Image;
+            item.Condition = dto.Condition;
+            item.IsActive = dto.IsActive;
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
 
         // DELETE: api/Item/5
         [HttpDelete("{id}")]
@@ -82,5 +97,34 @@ namespace ebeytepe.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        
+        [HttpGet("sorted-by-price")]
+        public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByPrice([FromQuery] bool desc = false, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var offset = (page - 1) * pageSize;
+
+            var items = await _context.Items
+                .FromSqlRaw("SELECT * FROM SortItemsByCurrentPricePaged({0}, {1}, {2})", desc, pageSize, offset)
+                .ToListAsync();
+
+            return Ok(items);
+        }
+        
+        [HttpGet("sorted-by-endtime")]
+        public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByEndTime(
+            [FromQuery] bool desc = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var offset = (page - 1) * pageSize;
+
+            var items = await _context.Items
+                .FromSqlRaw("SELECT * FROM SortItemsByEndTimePaged({0}, {1}, {2})", desc, pageSize, offset)
+                .ToListAsync();
+
+            return Ok(items);
+        }
+
+
     }
 }
