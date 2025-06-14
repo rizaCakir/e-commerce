@@ -18,7 +18,7 @@ public class User
     public string Email { get; set; }
     public string StudentId { get; set; }
     public int Reputation { get; set; }
-    public IEnumerable<Autobid>? Autobids { get; set; }
+
     public IEnumerable<Favourite>? Favourites { get; set; }
     public IEnumerable<Bid>? Bids { get; set; }
     public IEnumerable<Transaction>? TransactionsAsBuyer { get; set; }

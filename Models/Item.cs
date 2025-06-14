@@ -27,7 +27,6 @@ namespace ebeytepe.Models
         [JsonIgnore]
         public User User { get; set; }
 
-        public IEnumerable<Autobid>? Autobids { get; set; }
         public IEnumerable<Favourite>? Favourites { get; set; }
         public IEnumerable<Bid>? Bids { get; set; }
         public IEnumerable<Transaction>? Transactions { get; set; }

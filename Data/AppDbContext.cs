@@ -18,7 +18,6 @@ namespace ebeytepe.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Bid> Bids { get; set; }
-        public DbSet<Autobid> Autobids { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Favourite> Favourites { get; set; }
         public DbSet<VirtualCurrency> VirtualCurrencies { get; set; }
@@ -27,19 +26,6 @@ namespace ebeytepe.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Autobid: composite primary key (UserId + ItemId)
-            modelBuilder.Entity<Autobid>()
-                .HasKey(ab => new { ab.UserId, ab.ItemId });
-
-            modelBuilder.Entity<Autobid>()
-                .HasOne(ab => ab.User)
-                .WithMany(u => u.Autobids)
-                .HasForeignKey(ab => ab.UserId);
-
-            modelBuilder.Entity<Autobid>()
-                .HasOne(ab => ab.Item)
-                .WithMany(i => i.Autobids)
-                .HasForeignKey(ab => ab.ItemId);
 
             // Favourite: composite primary key (UserId + ItemId)
             modelBuilder.Entity<Favourite>()
@@ -95,6 +81,15 @@ namespace ebeytepe.Data
                 .HasOne(vc => vc.User)
                 .WithOne(u => u.VirtualCurrency)
                 .HasForeignKey<VirtualCurrency>(vc => vc.UserId);
+            
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.StudentId)
+                .IsUnique();
+
         }
     }
 }

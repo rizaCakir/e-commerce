@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ebeytepe.Data;
 using ebeytepe.Models;
 using ebeytepe.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace ebeytepe.Controllers
@@ -36,6 +37,7 @@ namespace ebeytepe.Controllers
         }
 
         // POST: api/Item
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create(ItemCreateDto dto)
         {
@@ -60,8 +62,8 @@ namespace ebeytepe.Controllers
 
             return CreatedAtAction(nameof(Get), new { id = item.ItemId }, item);
         }
-
-
+        
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] ItemUpdateDto dto)
         {
@@ -88,6 +90,7 @@ namespace ebeytepe.Controllers
 
 
         // DELETE: api/Item/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -98,18 +101,20 @@ namespace ebeytepe.Controllers
             return NoContent();
         }
         
+        [AllowAnonymous]
         [HttpGet("sorted-by-price")]
         public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByPrice([FromQuery] bool desc = false, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var offset = (page - 1) * pageSize;
 
             var items = await _context.Items
-                .FromSqlRaw("SELECT * FROM SortItemsByCurrentPricePaged({0}, {1}, {2})", desc, pageSize, offset)
+                .FromSqlRaw("SELECT * FROM SortItemsByCurrentPrice({0}, {1}, {2})", desc, pageSize, offset)
                 .ToListAsync();
 
             return Ok(items);
         }
         
+        [AllowAnonymous]
         [HttpGet("sorted-by-endtime")]
         public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByEndTime(
             [FromQuery] bool desc = false,

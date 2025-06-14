@@ -4,6 +4,11 @@ using ebeytepe.Models;
 using ebeytepe.Data;
 using Microsoft.AspNetCore.Identity;
 using ebeytepe.DTOs;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace ebeytepe.Controllers
@@ -13,11 +18,14 @@ namespace ebeytepe.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
 
-        public UserController(AppDbContext context)
+        public UserController(AppDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
+
 
         // GET: api/User
         [HttpGet]
@@ -37,9 +45,16 @@ namespace ebeytepe.Controllers
         }
 
         // POST: api/User
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserCreateDTO dto)
         {
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // 🚨 Detaylı hata için
+            }
+            
             var user = new User
             {
                 Name = dto.Name,
@@ -74,7 +89,7 @@ namespace ebeytepe.Controllers
         }
 
 
-        
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO dto)
         {
@@ -85,26 +100,45 @@ namespace ebeytepe.Controllers
             var hasher = new PasswordHasher<User>();
             var result = hasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
 
-            if (result == PasswordVerificationResult.Success)
-            {
-                // Güvenlik için password hash’i dışarı verme
-                return Ok(new
-                {
-                    user.UserId,
-                    user.Name,
-                    user.Email,
-                    user.StudentId,
-                    user.Reputation
-                });
-            }
+            if (result != PasswordVerificationResult.Success)
+                return Unauthorized("Invalid email or password.");
 
-            return Unauthorized("Invalid email or password.");
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.Name)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            Console.WriteLine("Token signing key: " + _config["Jwt:Key"]);
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(12),
+                signingCredentials: creds
+            );
+
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                user.UserId,
+                user.Name,
+                user.Email
+            });
         }
+        
+
 
 
 
 
         // PUT: api/User/5
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User updatedUser)
         {
@@ -116,6 +150,7 @@ namespace ebeytepe.Controllers
         }
 
         // DELETE: api/User/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

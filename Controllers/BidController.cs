@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ebeytepe.Data;
 using ebeytepe.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Npgsql;
 
 [Route("api/[controller]")]
@@ -15,7 +16,7 @@ public class BidController : ControllerBase
         _context = context;
     }
     
-
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(BidCreateDto dto)
     {
@@ -40,6 +41,7 @@ public class BidController : ControllerBase
         }
     }
     
+    [Authorize]
     [HttpPost("buyout")]
     public async Task<IActionResult> BuyoutItem([FromBody] BuyoutDto dto)
     {
@@ -63,8 +65,8 @@ public class BidController : ControllerBase
         }
     }
 
-
-
+    
+    
     [HttpGet("{itemId}")]
     public async Task<IActionResult> GetBidsForItem(int itemId)
     {

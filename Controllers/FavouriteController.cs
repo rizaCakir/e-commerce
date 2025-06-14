@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ebeytepe.DTOs;
 using ebeytepe.Data;
 using ebeytepe.Models;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,6 +19,7 @@ public class FavouritesController : ControllerBase
     }
 
     // Add to favourites
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> AddToFavourites([FromBody] FavouriteDto dto)
     {
@@ -39,6 +41,7 @@ public class FavouritesController : ControllerBase
     }
 
     // Remove from favourites
+    [Authorize]
     [HttpDelete]
     public async Task<IActionResult> RemoveFromFavourites([FromQuery] int userId, [FromQuery] int itemId)
     {
@@ -54,6 +57,7 @@ public class FavouritesController : ControllerBase
     }
 
     // Get all favourites for a user
+    [Authorize]
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetFavourites(int userId)
     {
