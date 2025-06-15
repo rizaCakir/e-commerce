@@ -17,7 +17,11 @@ public class User
 
     public string Email { get; set; }
     public string StudentId { get; set; }
-    public int Reputation { get; set; }
+    public int RatingTotal { get; set; } = 0;        
+    public int RatingCount { get; set; } = 0;        
+    
+    [NotMapped]
+    public double AverageRating => RatingCount > 0 ? (double)RatingTotal / RatingCount : 0.0;
 
     public IEnumerable<Favourite>? Favourites { get; set; }
     public IEnumerable<Bid>? Bids { get; set; }

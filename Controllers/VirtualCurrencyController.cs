@@ -41,14 +41,17 @@ public class VirtualCurrencyController : ControllerBase
         return Ok(vc);
     }
 
+    
+
     [HttpPut("{userId}")]
-    public async Task<IActionResult> UpdateBalance(int userId, [FromBody] decimal amount)
+    public async Task<IActionResult> UpdateBalance(int userId, [FromBody] BalanceUpdateDto dto)
     {
         var vc = await _context.VirtualCurrencies.FirstOrDefaultAsync(vc => vc.UserId == userId);
         if (vc == null) return NotFound("Balance not found.");
 
-        vc.Amount = amount;
+        vc.Amount = dto.Amount;
         await _context.SaveChangesAsync();
         return Ok(vc);
     }
+
 }

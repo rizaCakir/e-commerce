@@ -1,4 +1,4 @@
-﻿namespace ebeytepe.Dtos
+﻿namespace ebeytepe.DTOs
 {
     public class TransactionCreateDto
     {

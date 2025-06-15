@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ebeytepe.Data;
@@ -11,9 +12,11 @@ using ebeytepe.Data;
 namespace ebeytepe.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615003456_MakeImageNullable")]
+    partial class MakeImageNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,61 +24,6 @@ namespace ebeytepe.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Item", b =>
-                {
-                    b.Property<int>("ItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ItemId"));
-
-                    b.Property<decimal>("BuyoutPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Condition")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("CurrentPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Image")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("StartingPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ItemId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Items");
-                });
 
             modelBuilder.Entity("User", b =>
                 {
@@ -97,10 +45,7 @@ namespace ebeytepe.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RatingCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RatingTotal")
+                    b.Property<int>("Reputation")
                         .HasColumnType("integer");
 
                     b.Property<string>("StudentId")
@@ -162,6 +107,61 @@ namespace ebeytepe.Migrations
                     b.ToTable("Favourites");
                 });
 
+            modelBuilder.Entity("ebeytepe.Models.Item", b =>
+                {
+                    b.Property<int>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ItemId"));
+
+                    b.Property<decimal>("BuyoutPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("CurrentPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("StartingPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Items");
+                });
+
             modelBuilder.Entity("ebeytepe.Models.Transaction", b =>
                 {
                     b.Property<int>("TransactionId")
@@ -182,7 +182,7 @@ namespace ebeytepe.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("Rating")
+                    b.Property<int>("Rating")
                         .HasColumnType("integer");
 
                     b.Property<int>("SellerId")
@@ -212,20 +212,9 @@ namespace ebeytepe.Migrations
                     b.ToTable("VirtualCurrencies");
                 });
 
-            modelBuilder.Entity("Item", b =>
-                {
-                    b.HasOne("User", "User")
-                        .WithMany("Items")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ebeytepe.Models.Bid", b =>
                 {
-                    b.HasOne("Item", "Item")
+                    b.HasOne("ebeytepe.Models.Item", "Item")
                         .WithMany("Bids")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -244,7 +233,7 @@ namespace ebeytepe.Migrations
 
             modelBuilder.Entity("ebeytepe.Models.Favourite", b =>
                 {
-                    b.HasOne("Item", "Item")
+                    b.HasOne("ebeytepe.Models.Item", "Item")
                         .WithMany("Favourites")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -261,6 +250,17 @@ namespace ebeytepe.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ebeytepe.Models.Item", b =>
+                {
+                    b.HasOne("User", "User")
+                        .WithMany("Items")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ebeytepe.Models.Transaction", b =>
                 {
                     b.HasOne("User", "Buyer")
@@ -269,7 +269,7 @@ namespace ebeytepe.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Item", "Item")
+                    b.HasOne("ebeytepe.Models.Item", "Item")
                         .WithMany("Transactions")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -299,15 +299,6 @@ namespace ebeytepe.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Item", b =>
-                {
-                    b.Navigation("Bids");
-
-                    b.Navigation("Favourites");
-
-                    b.Navigation("Transactions");
-                });
-
             modelBuilder.Entity("User", b =>
                 {
                     b.Navigation("Bids");
@@ -321,6 +312,15 @@ namespace ebeytepe.Migrations
                     b.Navigation("TransactionsAsSeller");
 
                     b.Navigation("VirtualCurrency");
+                });
+
+            modelBuilder.Entity("ebeytepe.Models.Item", b =>
+                {
+                    b.Navigation("Bids");
+
+                    b.Navigation("Favourites");
+
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

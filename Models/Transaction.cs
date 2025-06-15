@@ -14,7 +14,7 @@ public class Transaction
     public int ItemId { get; set; }
     public decimal Price { get; set; }
     public DateTime Date { get; set; }
-    public int Rating { get; set; }
+    public int? Rating { get; set; }
 
     public User Buyer { get; set; }
     public User Seller { get; set; }

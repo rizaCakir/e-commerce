@@ -89,6 +89,14 @@ namespace ebeytepe.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.StudentId)
                 .IsUnique();
+            
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Category)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Condition)
+                .HasConversion<string>();
 
         }
     }

@@ -36,13 +36,27 @@ namespace ebeytepe.Controllers
         }
 
         // GET: api/User/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(int id)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUser(int userId)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
+            var user = await _context.Users
+                .Where(u => u.UserId == userId)
+                .Select(u => new
+                {
+                    u.UserId,
+                    u.Name,
+                    u.Email,
+                    u.StudentId,
+                    u.AverageRating
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+                return NotFound();
+
             return Ok(user);
         }
+
 
         // POST: api/User
         [AllowAnonymous]
@@ -60,7 +74,8 @@ namespace ebeytepe.Controllers
                 Name = dto.Name,
                 Email = dto.Email,
                 StudentId = dto.StudentId,
-                Reputation = 0
+                RatingCount = 0,
+                RatingTotal = 0
             };
 
             var hasher = new PasswordHasher<User>();
@@ -84,7 +99,7 @@ namespace ebeytepe.Controllers
                 user.Name,
                 user.Email,
                 user.StudentId,
-                user.Reputation
+                user.AverageRating
             });
         }
 
@@ -119,7 +134,7 @@ namespace ebeytepe.Controllers
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(12),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
             );
 
@@ -161,5 +176,22 @@ namespace ebeytepe.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        
+        [HttpGet("{id}/rating")]
+        public async Task<IActionResult> GetUserRating(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound("User not found.");
+
+            if (user.RatingCount == 0)
+                return Ok(new { averageRating = 0.0, ratingCount = 0 });
+
+            var averageRating = (double)user.RatingTotal / user.RatingCount;
+            return Ok(new { averageRating, ratingCount = user.RatingCount });
+        }
+
     }
+    
+    
 }

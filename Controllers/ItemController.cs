@@ -39,8 +39,15 @@ namespace ebeytepe.Controllers
         // POST: api/Item
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(ItemCreateDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] ItemCreateDto dto)
         {
+            
+            if (dto.StartingPrice > dto.BuyoutPrice)
+            {
+                return BadRequest("Starting price cannot be higher than buyout price.");
+            }
+            
             var item = new Item
             {
                 UserId = dto.UserId,
@@ -52,9 +59,9 @@ namespace ebeytepe.Controllers
                 BuyoutPrice = dto.BuyoutPrice,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
-                Image = dto.Image,
                 Condition = dto.Condition,
-                IsActive = dto.IsActive
+                IsActive = dto.IsActive,
+                Image = dto.ImageFile?.FileName // Just store file name for now (or handle save)
             };
 
             _context.Items.Add(item);
@@ -62,7 +69,8 @@ namespace ebeytepe.Controllers
 
             return CreatedAtAction(nameof(Get), new { id = item.ItemId }, item);
         }
-        
+
+
         [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] ItemUpdateDto dto)
@@ -100,36 +108,75 @@ namespace ebeytepe.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-        
+
         [AllowAnonymous]
         [HttpGet("sorted-by-price")]
-        public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByPrice([FromQuery] bool desc = false, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByPrice(
+            [FromQuery] bool desc = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12,
+            [FromQuery] string category = "All",
+            [FromQuery] string condition = "All")
         {
             var offset = (page - 1) * pageSize;
 
             var items = await _context.Items
-                .FromSqlRaw("SELECT * FROM SortItemsByCurrentPrice({0}, {1}, {2})", desc, pageSize, offset)
+                .FromSqlRaw("SELECT * FROM SortItemsByCurrentPrice({0}, {1}, {2}, {3}, {4})",
+                    desc, pageSize, offset, category, condition)
                 .ToListAsync();
 
             return Ok(items);
         }
-        
+
+
         [AllowAnonymous]
         [HttpGet("sorted-by-endtime")]
         public async Task<ActionResult<IEnumerable<Item>>> GetItemsSortedByEndTime(
             [FromQuery] bool desc = false,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string category = "All",
+            [FromQuery] string condition = "All")
+        
+        
         {
             var offset = (page - 1) * pageSize;
 
             var items = await _context.Items
-                .FromSqlRaw("SELECT * FROM SortItemsByEndTimePaged({0}, {1}, {2})", desc, pageSize, offset)
+                .FromSqlRaw("SELECT * FROM SortItemsByEndTimePaged({0}, {1}, {2}, {3}, {4})",
+                    desc, pageSize, offset, category, condition)
                 .ToListAsync();
 
             return Ok(items);
         }
 
+        [Authorize]
+        [HttpGet("by-user/{userId}")]
+        public async Task<IActionResult> GetItemsByUser(int userId)
+        {
+            var items = await _context.Items
+                .Where(i => i.UserId == userId)
+                .Include(i => i.User)
+                .ToListAsync();
+
+            return Ok(items);
+            
+        }
+        
+        [Authorize]
+        // GET: api/Item/bought-by-user/8
+        [HttpGet("bought-by-user/{userId}")]
+        public async Task<IActionResult> GetBoughtItemsByUser(int userId)
+        {
+            var items = await _context.Transactions
+                .Where(t => t.BuyerId == userId)
+                .Include(t => t.Item)
+                .ThenInclude(i => i.User) 
+                .Select(t => t.Item)
+                .ToListAsync();
+
+            return Ok(items);
+        }
 
     }
 }

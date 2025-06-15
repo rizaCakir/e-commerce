@@ -1,6 +1,6 @@
 ﻿using ebeytepe.Data;
 using ebeytepe.Models;
-using ebeytepe.Dtos;
+using ebeytepe.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -79,4 +79,51 @@ public class TransactionController : ControllerBase
 
         return Ok(transaction);
     }
+    
+    [HttpPost("rate")]
+    public async Task<IActionResult> RateUser([FromBody] RateUserDto dto)
+    {
+        if (dto.Rating < 1 || dto.Rating > 5)
+            return BadRequest("Rating must be between 1 and 5.");
+
+        var transaction = await _context.Transactions.FindAsync(dto.TransactionId);
+        if (transaction == null)
+            return NotFound("Transaction not found.");
+
+        var seller = await _context.Users.FindAsync(transaction.SellerId);
+        if (seller == null)
+            return NotFound("Seller not found.");
+
+        // Optionally prevent multiple ratings for same transaction
+        if (transaction.Rating != null)
+            return BadRequest("This transaction has already been rated.");
+
+        seller.RatingTotal += dto.Rating;
+        seller.RatingCount += 1;
+        transaction.Rating = dto.Rating;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Rating submitted.",
+            sellerId = seller.UserId,
+            averageRating = (double)seller.RatingTotal / seller.RatingCount
+        });
+    }
+    
+    
+    [HttpGet("by-item-id/{itemId}")]
+    public async Task<IActionResult> GetTransactionByItemId(int itemId)
+    {
+        var transaction = await _context.Transactions
+            .FirstOrDefaultAsync(t => t.ItemId == itemId);
+
+        if (transaction == null)
+            return NotFound("Transaction not found for this item.");
+
+        return Ok(transaction);
+    }
+
+
 }
