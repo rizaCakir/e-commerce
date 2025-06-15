@@ -1,13 +1,377 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-sky-50;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-3xl font-bold text-sky-800;
+  }
+
+  h2 {
+    @apply text-2xl font-bold text-sky-800;
+  }
+
+  h3 {
+    @apply text-xl font-bold text-sky-800;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer components {
+  .btn-primary {
+    @apply bg-sky-500 text-white px-4 py-2 rounded-md hover:bg-sky-600 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-sky-600 border border-sky-200 px-4 py-2 rounded-md hover:bg-sky-50 transition-colors;
+  }
+
+  .card {
+    @apply bg-white border border-sky-100 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow;
+  }
+
+  .nav-link {
+    @apply text-sky-700 hover:text-sky-900 px-3 py-2 rounded-md text-sm font-medium;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-sky-200 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-sky-700 mb-1;
+  }
+
+  .error-message {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  .success-message {
+    @apply text-green-600 text-sm mt-1;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500;
+  }
+
+  .page-container {
+    @apply min-h-screen bg-sky-50;
+  }
+
+  .content-container {
+    @apply container mx-auto px-4 py-8;
+  }
+
+  .grid-container {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .card-image {
+    @apply w-full h-48 object-cover;
+  }
+
+  .card-content {
+    @apply p-4;
+  }
+
+  .card-title {
+    @apply text-xl font-bold mb-2 text-sky-800;
+  }
+
+  .card-description {
+    @apply text-sky-600 mb-2 line-clamp-2;
+  }
+
+  .card-price {
+    @apply text-sky-600 font-semibold;
+  }
+
+  .empty-state {
+    @apply text-center py-12 bg-white rounded-lg shadow-md;
+  }
+
+  .empty-state-text {
+    @apply text-sky-600 text-lg mb-4;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-sky-50;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-sky-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-sky-400;
+}
+
+/* Custom focus styles */
+*:focus {
+  @apply outline-none ring-2 ring-sky-500 ring-opacity-50;
+}
+
+/* Custom selection styles */
+::selection {
+  @apply bg-sky-200 text-sky-900;
+}
+
+/* Custom placeholder styles */
+::placeholder {
+  @apply text-sky-300;
+}
+
+/* Custom transition durations */
+.transition-slow {
+  @apply transition-all duration-300;
+}
+
+.transition-medium {
+  @apply transition-all duration-200;
+}
+
+.transition-fast {
+  @apply transition-all duration-100;
+}
+
+/* Custom shadows */
+.shadow-soft {
+  @apply shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)];
+}
+
+.shadow-hover {
+  @apply hover:shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1),0_12px_24px_-2px_rgba(0,0,0,0.06)];
+}
+
+/* Custom gradients */
+.bg-gradient-primary {
+  @apply bg-gradient-to-r from-sky-400 to-sky-600;
+}
+
+.bg-gradient-secondary {
+  @apply bg-gradient-to-r from-sky-50 to-sky-100;
+}
+
+/* Custom text gradients */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-sky-800;
+}
+
+/* Custom border styles */
+.border-soft {
+  @apply border border-sky-100;
+}
+
+.border-focus {
+  @apply focus:border-sky-500 focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50;
+}
+
+/* Custom button styles */
+.btn-gradient {
+  @apply bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 rounded-md hover:from-sky-600 hover:to-sky-700 transition-all duration-200;
+}
+
+.btn-outline {
+  @apply border-2 border-sky-500 text-sky-600 px-4 py-2 rounded-md hover:bg-sky-50 transition-all duration-200;
+}
+
+/* Custom card styles */
+.card-hover {
+  @apply transform hover:-translate-y-1 transition-all duration-200;
+}
+
+/* Custom badge styles */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-primary {
+  @apply bg-sky-100 text-sky-800;
+}
+
+.badge-secondary {
+  @apply bg-sky-50 text-sky-600 border border-sky-200;
+}
+
+/* Custom alert styles */
+.alert {
+  @apply p-4 rounded-md mb-4;
+}
+
+.alert-success {
+  @apply bg-green-50 text-green-800 border border-green-200;
+}
+
+.alert-error {
+  @apply bg-red-50 text-red-800 border border-red-200;
+}
+
+.alert-info {
+  @apply bg-sky-50 text-sky-800 border border-sky-200;
+}
+
+/* Custom tooltip styles */
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip-text {
+  @apply invisible absolute z-10 px-3 py-2 text-sm text-white bg-sky-900 rounded-md opacity-0 transition-opacity duration-300;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible opacity-100;
+}
+
+/* Custom modal styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4;
+}
+
+/* Custom form styles */
+.form-group {
+  @apply mb-4;
+}
+
+.form-error {
+  @apply text-red-600 text-sm mt-1;
+}
+
+.form-success {
+  @apply text-green-600 text-sm mt-1;
+}
+
+/* Custom table styles */
+.table-container {
+  @apply overflow-x-auto;
+}
+
+.table {
+  @apply min-w-full divide-y divide-sky-200;
+}
+
+.table-header {
+  @apply bg-sky-50;
+}
+
+.table-header-cell {
+  @apply px-6 py-3 text-left text-xs font-medium text-sky-600 uppercase tracking-wider;
+}
+
+.table-body {
+  @apply bg-white divide-y divide-sky-200;
+}
+
+.table-cell {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-sky-900;
+}
+
+/* Custom pagination styles */
+.pagination {
+  @apply flex justify-center space-x-2 mt-4;
+}
+
+.pagination-item {
+  @apply px-3 py-1 rounded-md text-sm font-medium;
+}
+
+.pagination-active {
+  @apply bg-sky-500 text-white;
+}
+
+.pagination-inactive {
+  @apply text-sky-600 hover:bg-sky-50;
+}
+
+/* Custom avatar styles */
+.avatar {
+  @apply rounded-full overflow-hidden;
+}
+
+.avatar-sm {
+  @apply w-8 h-8;
+}
+
+.avatar-md {
+  @apply w-12 h-12;
+}
+
+.avatar-lg {
+  @apply w-16 h-16;
+}
+
+/* Custom badge notification styles */
+.badge-notification {
+  @apply absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center;
+}
+
+/* Custom dropdown styles */
+.dropdown {
+  @apply relative inline-block;
+}
+
+.dropdown-content {
+  @apply absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none;
+}
+
+.dropdown-item {
+  @apply block px-4 py-2 text-sm text-sky-700 hover:bg-sky-50;
+}
+
+/* Custom toggle switch styles */
+.toggle-switch {
+  @apply relative inline-flex items-center h-6 rounded-full w-11;
+}
+
+.toggle-switch-checked {
+  @apply bg-sky-500;
+}
+
+.toggle-switch-unchecked {
+  @apply bg-gray-200;
+}
+
+.toggle-switch-handle {
+  @apply inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200;
+}
+
+.toggle-switch-handle-checked {
+  @apply translate-x-6;
+}
+
+.toggle-switch-handle-unchecked {
+  @apply translate-x-1;
 }
