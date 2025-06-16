@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ApiProvider } from './context/ApiContext';
+import { ToastProvider } from './context/ToastContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -12,6 +14,9 @@ import SellItem from './pages/SellItem';
 import YourItems from './pages/YourItems';
 import BoughtItems from './pages/BoughtItems';
 import ItemDetail from './pages/ItemDetail';
+import SearchPage from './pages/SearchPage';
+import UserProfile from './pages/UserProfile';
+import YourItemDetail from './pages/YourItemDetail';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -122,6 +127,14 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/sell"
             element={
               <ProtectedRoute>
@@ -145,6 +158,22 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <SearchPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/your-item/:id"
+            element={
+              <ProtectedRoute>
+                <YourItemDetail />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>
@@ -154,11 +183,15 @@ const AppRoutes = () => {
 // Main App component
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <ApiProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </ApiProvider>
+      </AuthProvider>
+    </Router>
   );
 };
 

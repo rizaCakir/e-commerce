@@ -109,8 +109,7 @@ const ItemDetail = () => {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "https://picsum.photos/400/300";
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:5260/${imagePath}`;
+    return imagePath;
   };
 
   const renderStars = (rating) => {

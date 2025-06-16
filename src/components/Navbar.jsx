@@ -1,143 +1,90 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import SearchBar from "./SearchBar";
 
-const Navbar = () => {
+export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/");
   };
 
   return (
-    <nav className="bg-gradient-secondary shadow-soft">
-      <div className="content-container">
+    <nav className="bg-white shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-gradient">eBeytepe</span>
+          <div className="flex items-center space-x-6">
+            <Link to="/" className="text-2xl font-bold text-green-600">
+              eBeytepe
             </Link>
-            <div className="hidden md:ml-6 md:flex md:space-x-4">
-              <Link to="/" className="nav-link">
-                Home
-              </Link>
-              <Link to="/items" className="nav-link">
-                Browse Items
-              </Link>
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <>
-                <Link to="/profile" className="nav-link">
-                  Profile
-                </Link>
-                <Link to="/your-items" className="nav-link">
-                  Your Items
-                </Link>
-                <Link to="/bought-items" className="nav-link">
-                  Bought Items
-                </Link>
-                <Link to="/sell" className="btn-gradient">
-                  Sell Item
-                </Link>
-                <button onClick={handleLogout} className="nav-link">
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="nav-link">
-                  Login
-                </Link>
-                <Link to="/register" className="btn-gradient">
-                  Register
-                </Link>
-              </>
-            )}
-          </div>
-
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-sky-700 hover:text-sky-900 transition-medium"
+            <Link
+              to="/items"
+              className="text-gray-700 hover:text-green-600 transition-colors"
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
+              Browse
+            </Link>
           </div>
-        </div>
-      </div>
 
-      {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-soft animate-fade-in">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link to="/" className="nav-link block">
-              Home
-            </Link>
-            <Link to="/items" className="nav-link block">
-              Browse Items
-            </Link>
+          <div className="flex-1 flex items-center justify-center px-4 max-w-md">
+            <SearchBar />
+          </div>
+
+          <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <Link to="/profile" className="nav-link block">
+                <Link
+                  to="/profile"
+                  className="text-gray-700 hover:text-green-600 transition-colors"
+                >
                   Profile
                 </Link>
-                <Link to="/your-items" className="nav-link block">
+                <Link
+                  to="/your-items"
+                  className="text-gray-700 hover:text-green-600 transition-colors"
+                >
                   Your Items
                 </Link>
-                <Link to="/bought-items" className="nav-link block">
+                <Link
+                  to="/bought-items"
+                  className="text-gray-700 hover:text-green-600 transition-colors"
+                >
                   Bought Items
                 </Link>
-                <Link to="/sell" className="btn-gradient block text-center">
+                <Link
+                  to="/sell"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                >
                   Sell Item
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="nav-link block w-full text-left"
+                  className="text-gray-700 hover:text-green-600 transition-colors"
                 >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="nav-link block">
+                <Link
+                  to="/login"
+                  className="text-gray-700 hover:text-green-600 transition-colors"
+                >
                   Login
                 </Link>
-                <Link to="/register" className="btn-gradient block text-center">
+                <Link
+                  to="/register"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                >
                   Register
                 </Link>
               </>
             )}
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
-};
-
-export default Navbar;
+}

@@ -11,27 +11,20 @@ const SellItem = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    startingPrice: '',
-    buyoutPrice: '',
     duration: '1', // Default to 1 minute
     category: 0, // Default category (Other)
     condition: 0, // Default condition (New)
-    image: null
+    startingPrice: '',
+    buyoutPrice: '',
+    image: '' // Changed from file to URL
   });
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'image' && files) {
-      setFormData(prev => ({
-        ...prev,
-        image: files[0]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -48,23 +41,21 @@ const SellItem = () => {
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + parseFloat(formData.duration) * 60 * 1000); // Convert minutes to milliseconds
   
-      const multipartForm = new FormData();
-      multipartForm.append('UserId', user.userId);
-      multipartForm.append('Title', formData.title);
-      multipartForm.append('Description', formData.description);
-      multipartForm.append('Category', formData.category);
-      multipartForm.append('StartingPrice', formData.startingPrice);
-      multipartForm.append('CurrentPrice', formData.startingPrice);
-      multipartForm.append('BuyoutPrice', formData.buyoutPrice || 0);
-      multipartForm.append('StartTime', startTime.toISOString());
-      multipartForm.append('EndTime', endTime.toISOString());
-      multipartForm.append('Condition', formData.condition);
-      multipartForm.append('IsActive', true);
-      if (formData.image) {
-        multipartForm.append('ImageFile', formData.image); // 🔥 name must match DTO!
-      }
+      const formDataToSend = new FormData();
+      formDataToSend.append('UserId', user.userId);
+      formDataToSend.append('Title', formData.title);
+      formDataToSend.append('Description', formData.description);
+      formDataToSend.append('Category', formData.category);
+      formDataToSend.append('StartingPrice', formData.startingPrice);
+      formDataToSend.append('CurrentPrice', formData.startingPrice);
+      formDataToSend.append('BuyoutPrice', formData.buyoutPrice || 0);
+      formDataToSend.append('StartTime', startTime.toISOString());
+      formDataToSend.append('EndTime', endTime.toISOString());
+      formDataToSend.append('Condition', formData.condition);
+      formDataToSend.append('IsActive', true);
+      formDataToSend.append('ImageUrl', formData.image);
   
-      const response = await axios.post('http://localhost:5260/api/Item', multipartForm, {
+      const response = await axios.post('http://localhost:5260/api/Item', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -233,18 +224,19 @@ const SellItem = () => {
 
           <div>
             <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-              Item Image
+              Image URL
             </label>
             <input
-              type="file"
+              type="url"
               id="image"
               name="image"
+              value={formData.image}
               onChange={handleChange}
-              accept="image/*"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="https://example.com/image.jpg"
             />
             <p className="mt-1 text-sm text-gray-500">
-              Upload a clear image of your item (max 5MB)
+              Enter the URL of your item's image
             </p>
           </div>
 

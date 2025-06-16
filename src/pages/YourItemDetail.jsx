@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useApi } from '../context/ApiContext';
 import { useToast } from '../context/ToastContext';
 
-const AuctionDetail = () => {
+const YourItemDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { api } = useApi();
@@ -13,11 +13,9 @@ const AuctionDetail = () => {
 
   const [item, setItem] = useState(null);
   const [bids, setBids] = useState([]);
-  const [bidAmount, setBidAmount] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState('');
-  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const fetchItemData = async () => {
@@ -46,17 +44,6 @@ const AuctionDetail = () => {
         console.log('Bids response:', JSON.stringify(bidsResponse.data, null, 2));
         const bidsData = Array.isArray(bidsResponse.data.$values) ? bidsResponse.data.$values : [];
         setBids(bidsData);
-
-        // Check if item is in favorites
-        if (user) {
-          try {
-            const favoritesResponse = await api.get(`/api/Favourites/${user.userId}`);
-            const favorites = Array.isArray(favoritesResponse.data.$values) ? favoritesResponse.data.$values : [];
-            setIsFavorite(favorites.some(fav => fav.itemId === parseInt(id)));
-          } catch (err) {
-            console.error('Error checking favorites:', err);
-          }
-        }
       } catch (err) {
         console.error('Error:', err);
         setError(err.message);
@@ -67,7 +54,7 @@ const AuctionDetail = () => {
     };
 
     fetchItemData();
-  }, [id, api, showToast, user]);
+  }, [id, api, showToast]);
 
   useEffect(() => {
     if (item?.endTime) {
@@ -93,79 +80,6 @@ const AuctionDetail = () => {
       return () => clearInterval(timer);
     }
   }, [item?.endTime]);
-
-  const handleBidSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      showToast('Please login to place a bid', 'error');
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const response = await api.post('/api/Bid', {
-        itemId: id,
-        amount: parseFloat(bidAmount),
-        userId: user.userId
-      });
-
-      setBids([...bids, response.data]);
-      setItem({ ...item, currentPrice: response.data.amount });
-      setBidAmount('');
-      showToast('Bid placed successfully', 'success');
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Error placing bid', 'error');
-    }
-  };
-
-  const handleBuyNow = async () => {
-    if (!user) {
-      showToast('Please login to buy this item', 'error');
-      navigate('/login');
-      return;
-    }
-
-    try {
-      await api.post('/api/Bid/buyout', {
-        itemId: id,
-        userId: user.userId
-      });
-
-      showToast('Item purchased successfully', 'success');
-      navigate('/your-items');
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Error purchasing item', 'error');
-    }
-  };
-
-  const handleFavorite = async () => {
-    if (!user) {
-      showToast('Please login to add favorites', 'error');
-      navigate('/login');
-      return;
-    }
-
-    try {
-      if (isFavorite) {
-        await api.delete('/api/Favourites', {
-          params: {
-            userId: user.userId,
-            itemId: id
-          }
-        });
-        showToast('Removed from favorites', 'success');
-      } else {
-        await api.post('/api/Favourites', {
-          userId: user.userId,
-          itemId: parseInt(id)
-        });
-        showToast('Added to favorites', 'success');
-      }
-      setIsFavorite(!isFavorite);
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Error updating favorites', 'error');
-    }
-  };
 
   if (loading) {
     return (
@@ -267,55 +181,7 @@ const AuctionDetail = () => {
                   {timeLeft}
                 </span>
               </div>
-
-              <button
-                onClick={handleFavorite}
-                className={`w-full mt-4 px-4 py-2 rounded ${
-                  isFavorite
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                }`}
-              >
-                {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-              </button>
             </div>
-
-            {!isAuctionEnded && item.isActive && (
-              <div className="space-y-4">
-                <form onSubmit={handleBidSubmit} className="space-y-2">
-                  <div>
-                    <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-700">
-                      Your Bid (₺)
-                    </label>
-                    <input
-                      type="number"
-                      id="bidAmount"
-                      value={bidAmount}
-                      onChange={(e) => setBidAmount(e.target.value)}
-                      min={item.currentPrice + 1}
-                      step="0.01"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Place Bid
-                  </button>
-                </form>
-
-                {item.buyoutPrice && (
-                  <button
-                    onClick={handleBuyNow}
-                    className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Buy Now
-                  </button>
-                )}
-              </div>
-            )}
 
             {isAuctionEnded && (
               <div className="text-center p-4 bg-gray-100 rounded-lg">
@@ -346,6 +212,9 @@ const AuctionDetail = () => {
                       placed a bid of {bid.amount} ₺
                     </span>
                   </div>
+                  <span className="text-gray-500">
+                    {new Date(bid.timestamp).toLocaleString()}
+                  </span>
                 </div>
               ))}
             </div>
@@ -356,4 +225,4 @@ const AuctionDetail = () => {
   );
 };
 
-export default AuctionDetail; 
+export default YourItemDetail; 

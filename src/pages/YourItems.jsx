@@ -34,8 +34,7 @@ const YourItems = () => {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "https://picsum.photos/400/300";
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:5260/${imagePath}`;
+    return imagePath;
   };
 
   const formatTimeRemaining = (endTime) => {
@@ -106,7 +105,7 @@ const YourItems = () => {
                         </p>
                       </div>
                       <button
-                        onClick={() => navigate(`/auction/${item.itemId}`)}
+                        onClick={() => navigate(`/your-item/${item.itemId}`)}
                         className="btn-gradient w-full"
                       >
                         View Details

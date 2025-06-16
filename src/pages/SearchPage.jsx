@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const getCategoryText = (category) => {
   const categories = {
@@ -25,53 +25,52 @@ const getConditionText = (condition) => {
   return conditions[condition] || 'Unknown';
 };
 
-export default function ItemList() {
+export default function SearchPage() {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
   const [items, setItems] = useState([]);
-  const [sortBy, setSortBy] = useState("time-asc");
-  const [category, setCategory] = useState("");
-  const [condition, setCondition] = useState("");
-  const [page, setPage] = useState(1);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("time-asc");
   const pageSize = 12;
 
   useEffect(() => {
-    fetchItems();
-  }, [sortBy, page, category, condition]);
+    if (query) {
+      fetchSearchResults();
+    }
+  }, [query, page, sortBy]);
 
-  const fetchItems = async () => {
+  const fetchSearchResults = async () => {
     try {
       setLoading(true);
       setError(null);
-  
-      const isPriceSort = sortBy.startsWith("price");
-      const url = isPriceSort
-        ? "http://localhost:5260/api/Item/sorted-by-price"
-        : "http://localhost:5260/api/Item/sorted-by-endtime";
-  
-      const params = {
-        desc: sortBy.endsWith("desc"),
-        page,
-        pageSize,
-        category: category !== "" ? getCategoryText(parseInt(category)) : "All",
-        condition: condition !== "" ? getConditionText(parseInt(condition)) : "All"
-      };
-  
-      const response = await axios.get(url, { params });
+      const response = await axios.get("http://localhost:5260/api/Item/search", {
+        params: {
+          query,
+          page,
+          pageSize,
+          sortBy: sortBy === "time-desc" ? "endTime" : 
+                 sortBy === "time-asc" ? "endTime" :
+                 sortBy === "price-desc" ? "price" :
+                 sortBy === "price-asc" ? "price" : "endTime",
+          direction: sortBy === "time-desc" || sortBy === "price-desc" ? "desc" : "asc"
+        }
+      });
+
       const itemsData = Array.isArray(response.data)
         ? response.data
         : response.data.$values || [];
-  
-      console.log("Fetched items:", itemsData);
+
+      console.log("Search results:", itemsData);
       setItems(itemsData);
     } catch (err) {
-      console.error("Item fetch error:", err);
-      setError("Error loading items. Please try again.");
+      console.error("Search error:", err);
+      setError("Error performing search. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  
 
   const formatTimeRemaining = (endTime) => {
     const end = new Date(endTime);
@@ -98,8 +97,13 @@ export default function ItemList() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Browse Items</h1>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Search Results for "{query}"
+        </h1>
+        <div className="flex justify-between items-center">
+          <p className="text-gray-600">
+            Found {items.length} {items.length === 1 ? 'item' : 'items'}
+          </p>
           <select
             value={sortBy}
             onChange={(e) => {
@@ -113,51 +117,6 @@ export default function ItemList() {
             <option value="price-asc">Price (Low to High)</option>
             <option value="price-desc">Price (High to Low)</option>
           </select>
-
-          <select
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setPage(1);
-            }}
-            className="border p-2 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"
-          >
-            <option value="">All Categories</option>
-            <option value="0">Electronics</option>
-            <option value="1">Clothing</option>
-            <option value="2">Books</option>
-            <option value="3">Home</option>
-            <option value="4">Sports</option>
-            <option value="5">Other</option>
-          </select>
-
-          <select
-            value={condition}
-            onChange={(e) => {
-              setCondition(e.target.value);
-              setPage(1);
-            }}
-            className="border p-2 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"
-          >
-            <option value="">All Conditions</option>
-            <option value="0">New</option>
-            <option value="1">Like New</option>
-            <option value="2">Good</option>
-            <option value="3">Fair</option>
-            <option value="4">Poor</option>
-          </select>
-
-          <button
-            onClick={() => {
-              setCategory("");
-              setCondition("");
-              setSortBy("time-asc");
-              setPage(1);
-            }}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
-          >
-            Clear Filters
-          </button>
         </div>
       </div>
 
@@ -169,8 +128,8 @@ export default function ItemList() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <Link
-            to={`/auction/${item.itemId}`}
+          <a
+            href={`/auction/${item.itemId}`}
             key={item.itemId}
             className="bg-white border rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
           >
@@ -199,12 +158,14 @@ export default function ItemList() {
                 </div>
               </div>
             </div>
-          </Link>
+          </a>
         ))}
       </div>
 
       {items.length === 0 && !error && (
-        <div className="text-center text-gray-500 mt-8">No items found</div>
+        <div className="text-center text-gray-500 mt-8">
+          No items found matching your search
+        </div>
       )}
 
       <div className="mt-8 flex justify-center gap-4">
@@ -226,4 +187,4 @@ export default function ItemList() {
       </div>
     </div>
   );
-}
+} 
